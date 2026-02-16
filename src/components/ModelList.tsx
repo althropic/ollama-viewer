@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useModels } from "@/hooks/useModels";
+import { sortByLastUsed } from "@/lib/lastUsed";
 import { ModelCard } from "./ModelCard";
 import { SearchBar } from "./SearchBar";
 
@@ -9,11 +10,15 @@ export function ModelList() {
   const { models, isLoading, error, refetch } = useModels();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredModels = useMemo(() => {
-    if (!searchQuery.trim()) return models;
+  const sortedAndFilteredModels = useMemo(() => {
+    // First sort by last used
+    const sorted = sortByLastUsed(models);
+    
+    // Then filter by search query
+    if (!searchQuery.trim()) return sorted;
     
     const query = searchQuery.toLowerCase();
-    return models.filter((model) =>
+    return sorted.filter((model) =>
       model.id.toLowerCase().includes(query)
     );
   }, [models, searchQuery]);
@@ -64,7 +69,7 @@ export function ModelList() {
         />
       </div>
 
-      {filteredModels.length === 0 ? (
+      {sortedAndFilteredModels.length === 0 ? (
         <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-8 text-center">
           <h3 className="text-lg font-medium text-zinc-300">No matching models</h3>
           <p className="mt-2 text-sm text-zinc-500">
@@ -73,14 +78,14 @@ export function ModelList() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredModels.map((model) => (
+          {sortedAndFilteredModels.map((model) => (
             <ModelCard key={model.id} model={model} />
           ))}
         </div>
       )}
 
       <div className="text-center text-sm text-zinc-500">
-        Showing {filteredModels.length} of {models.length} models
+        Showing {sortedAndFilteredModels.length} of {models.length} models
       </div>
     </div>
   );

@@ -1,5 +1,8 @@
+"use client";
+
 import { OllamaModel } from "@/lib/types";
 import { getSizeInfo } from "@/lib/size";
+import { getLastUsed, formatLastUsed } from "@/lib/lastUsed";
 
 interface ModelCardProps {
   model: OllamaModel;
@@ -7,6 +10,7 @@ interface ModelCardProps {
 
 export function ModelCard({ model }: ModelCardProps) {
   const sizeInfo = getSizeInfo(model.id);
+  const lastUsed = getLastUsed(model.id);
   
   const formatDate = (timestamp: number) => {
     return new Date(timestamp * 1000).toLocaleDateString("en-US", {
@@ -32,10 +36,15 @@ export function ModelCard({ model }: ModelCardProps) {
         </span>
       </div>
 
-      <div className="mt-4 flex items-center gap-2">
+      <div className="mt-4 flex flex-wrap items-center gap-2">
         <span className="inline-flex items-center rounded-full bg-zinc-800 px-2.5 py-0.5 text-xs font-medium text-zinc-400">
           Created: {formatDate(model.created)}
         </span>
+        {lastUsed && (
+          <span className="inline-flex items-center rounded-full bg-emerald-900/30 px-2.5 py-0.5 text-xs font-medium text-emerald-400">
+            Last used: {formatLastUsed(lastUsed)}
+          </span>
+        )}
       </div>
     </div>
   );
