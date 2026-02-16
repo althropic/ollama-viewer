@@ -1,10 +1,13 @@
 import { OllamaModel } from "@/lib/types";
+import { getSizeInfo } from "@/lib/size";
 
 interface ModelCardProps {
   model: OllamaModel;
 }
 
 export function ModelCard({ model }: ModelCardProps) {
+  const sizeInfo = getSizeInfo(model.id);
+  
   const formatDate = (timestamp: number) => {
     return new Date(timestamp * 1000).toLocaleDateString("en-US", {
       year: "numeric",
@@ -24,6 +27,9 @@ export function ModelCard({ model }: ModelCardProps) {
             {model.owned_by}
           </p>
         </div>
+        <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${sizeInfo.color}`}>
+          {sizeInfo.label}
+        </span>
       </div>
 
       <div className="mt-4 flex items-center gap-2">
