@@ -3,25 +3,42 @@
 import { useState, useMemo } from "react";
 import { useModels } from "@/hooks/useModels";
 import { sortByLastUsed } from "@/lib/lastUsed";
+import { getSizeInfo, SizeCategory } from "@/lib/size";
 import { ModelCard } from "./ModelCard";
 import { SearchBar } from "./SearchBar";
+
+const sizeFilters: { category: SizeCategory | "all"; label: string; color: string }[] = [
+  { category: "all", label: "All", color: "bg-zinc-800 text-zinc-300 hover:bg-zinc-700" },
+  { category: "small", label: "Small", color: "bg-green-900/30 text-green-400 border-green-800 hover:bg-green-900/50" },
+  { category: "medium", label: "Medium", color: "bg-blue-900/30 text-blue-400 border-blue-800 hover:bg-blue-900/50" },
+  { category: "large", label: "Large", color: "bg-amber-900/30 text-amber-400 border-amber-800 hover:bg-amber-900/50" },
+  { category: "heavy", label: "Heavy", color: "bg-red-900/30 text-red-400 border-red-800 hover:bg-red-900/50" },
+];
 
 export function ModelList() {
   const { models, isLoading, error, refetch } = useModels();
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSize, setSelectedSize] = useState<SizeCategory | "all">("all");
 
   const sortedAndFilteredModels = useMemo(() => {
     // First sort by last used
-    const sorted = sortByLastUsed(models);
+    let result = sortByLastUsed(models);
+    
+    // Filter by size category
+    if (selectedSize !== "all") {
+      result = result.filter((model) => getSizeInfo(model.id).category === selectedSize);
+    }
     
     // Then filter by search query
-    if (!searchQuery.trim()) return sorted;
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter((model) =>
+        model.id.toLowerCase().includes(query)
+      );
+    }
     
-    const query = searchQuery.toLowerCase();
-    return sorted.filter((model) =>
-      model.id.toLowerCase().includes(query)
-    );
-  }, [models, searchQuery]);
+    return result;
+  }, [models, searchQuery, selectedSize]);
 
   if (isLoading) {
     return (
@@ -61,19 +78,37 @@ export function ModelList() {
 
   return (
     <div className="space-y-6">
-      <div className="max-w-md">
-        <SearchBar
-          value={searchQuery}
-          onChange={setSearchQuery}
-          placeholder="Search models (e.g., Qwen, Gemma, Llama)..."
-        />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+        <div className="flex-1 max-w-md">
+          <SearchBar
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search models (e.g., Qwen, Gemma, Llama)..."
+          />
+        </div>
+        
+        <div className="flex flex-wrap gap-2">
+          {sizeFilters.map((filter) => (
+            <button
+              key={filter.category}
+              onClick={() => setSelectedSize(filter.category)}
+              className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-all ${
+                selectedSize === filter.category
+                  ? filter.color + " ring-1 ring-white/20"
+                  : "bg-zinc-800/50 text-zinc-400 border-zinc-700 hover:bg-zinc-800 hover:text-zinc-300"
+              }`}
+            >
+              {filter.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {sortedAndFilteredModels.length === 0 ? (
         <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-8 text-center">
           <h3 className="text-lg font-medium text-zinc-300">No matching models</h3>
           <p className="mt-2 text-sm text-zinc-500">
-            Try a different search term.
+            Try a different search term or filter.
           </p>
         </div>
       ) : (
