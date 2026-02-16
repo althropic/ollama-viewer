@@ -1,10 +1,22 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import { useModels } from "@/hooks/useModels";
 import { ModelCard } from "./ModelCard";
+import { SearchBar } from "./SearchBar";
 
 export function ModelList() {
   const { models, isLoading, error, refetch } = useModels();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredModels = useMemo(() => {
+    if (!searchQuery.trim()) return models;
+    
+    const query = searchQuery.toLowerCase();
+    return models.filter((model) =>
+      model.id.toLowerCase().includes(query)
+    );
+  }, [models, searchQuery]);
 
   if (isLoading) {
     return (
@@ -43,10 +55,33 @@ export function ModelList() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {models.map((model) => (
-        <ModelCard key={model.id} model={model} />
-      ))}
+    <div className="space-y-6">
+      <div className="max-w-md">
+        <SearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search models (e.g., Qwen, Gemma, Llama)..."
+        />
+      </div>
+
+      {filteredModels.length === 0 ? (
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-8 text-center">
+          <h3 className="text-lg font-medium text-zinc-300">No matching models</h3>
+          <p className="mt-2 text-sm text-zinc-500">
+            Try a different search term.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filteredModels.map((model) => (
+            <ModelCard key={model.id} model={model} />
+          ))}
+        </div>
+      )}
+
+      <div className="text-center text-sm text-zinc-500">
+        Showing {filteredModels.length} of {models.length} models
+      </div>
     </div>
   );
 }
