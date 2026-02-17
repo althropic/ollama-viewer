@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from "react";
 import { useModels } from "@/hooks/useModels";
-import { sortByLastUsed } from "@/lib/lastUsed";
 import { getSizeInfo, SizeCategory } from "@/lib/size";
 import { ModelCard } from "./ModelCard";
 import { SearchBar } from "./SearchBar";
@@ -21,8 +20,8 @@ export function ModelList() {
   const [selectedSize, setSelectedSize] = useState<SizeCategory | "all">("all");
 
   const sortedAndFilteredModels = useMemo(() => {
-    // First sort by last used
-    let result = sortByLastUsed(models);
+    // Sort by created date (newest first)
+    let result = [...models].sort((a, b) => b.created - a.created);
     
     // Filter by size category
     if (selectedSize !== "all") {
