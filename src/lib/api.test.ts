@@ -11,7 +11,7 @@ describe("fetchModels", () => {
     vi.unstubAllGlobals();
   });
 
-  it("should fetch models successfully", async () => {
+  it("should fetch models successfully via proxy", async () => {
     const mockResponse: OllamaModelsResponse = {
       object: "list",
       data: [
@@ -34,7 +34,7 @@ describe("fetchModels", () => {
 
     expect(result).toEqual(mockResponse);
     expect(mockFetch).toHaveBeenCalledWith(
-      "http://localhost:8080/v1/models",
+      "/api/models",
       expect.objectContaining({
         method: "GET",
         headers: { "Content-Type": "application/json" },
@@ -47,10 +47,11 @@ describe("fetchModels", () => {
       ok: false,
       status: 500,
       statusText: "Internal Server Error",
+      json: () => Promise.resolve({ error: "Server error" }),
     });
     vi.stubGlobal("fetch", mockFetch);
 
-    await expect(fetchModels()).rejects.toThrow("Failed to fetch models");
+    await expect(fetchModels()).rejects.toThrow("Server error");
   });
 
   it("should throw error on network failure", async () => {
@@ -79,6 +80,13 @@ describe("checkApiHealth", () => {
     const result = await checkApiHealth();
 
     expect(result).toBe(true);
+    expect(mockFetch).toHaveBeenCalledWith(
+      "/api/models",
+      expect.objectContaining({
+        method: "GET",
+        signal: expect.any(AbortSignal),
+      })
+    );
   });
 
   it("should return false when API is unhealthy", async () => {

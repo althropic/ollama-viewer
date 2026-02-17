@@ -1,13 +1,11 @@
 import { OllamaModelsResponse, ApiError } from "./types";
 
-const OLLAMA_API_URL = "https://ollama.com";
-
 /**
- * Fetch models from Ollama API
- * Uses OpenAI-compatible /v1/models endpoint
+ * Fetch models from Ollama API via local proxy
+ * Uses Next.js API route to avoid CORS issues
  */
 export async function fetchModels(): Promise<OllamaModelsResponse> {
-  const response = await fetch(`${OLLAMA_API_URL}/v1/models`, {
+  const response = await fetch("/api/models", {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -15,8 +13,9 @@ export async function fetchModels(): Promise<OllamaModelsResponse> {
   });
 
   if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
     const error: ApiError = {
-      message: `Failed to fetch models: ${response.statusText}`,
+      message: errorData.error || `Failed to fetch models: ${response.statusText}`,
       status: response.status,
     };
     throw error;
@@ -31,7 +30,7 @@ export async function fetchModels(): Promise<OllamaModelsResponse> {
  */
 export async function checkApiHealth(): Promise<boolean> {
   try {
-    const response = await fetch(`${OLLAMA_API_URL}/v1/models`, {
+    const response = await fetch("/api/models", {
       method: "GET",
       signal: AbortSignal.timeout(5000),
     });
