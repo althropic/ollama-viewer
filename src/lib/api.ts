@@ -1,6 +1,6 @@
 import { OllamaModelsResponse, ApiError } from "./types";
 
-const OLLAMA_API_URL = process.env.NEXT_PUBLIC_OLLAMA_API_URL || "http://localhost:8080";
+const OLLAMA_API_URL = "https://ollama.com";
 
 /**
  * Fetch models from Ollama API
