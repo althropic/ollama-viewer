@@ -39,3 +39,43 @@ export async function checkApiHealth(): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * Fetch models from Fireworks API via local proxy
+ * Uses Next.js API route to avoid CORS issues
+ */
+export async function fetchFireworksModels(): Promise<ModelsResponse> {
+  const response = await fetch("/api/fireworks/models", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const error: ApiError = {
+      message: errorData.error || `Failed to fetch Fireworks models: ${response.statusText}`,
+      status: response.status,
+    };
+    throw error;
+  }
+
+  const data = await response.json();
+  return data as ModelsResponse;
+}
+
+/**
+ * Check if Fireworks API is available
+ */
+export async function checkFireworksApiHealth(): Promise<boolean> {
+  try {
+    const response = await fetch("/api/fireworks/models", {
+      method: "GET",
+      signal: AbortSignal.timeout(5000),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
