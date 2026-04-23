@@ -1,10 +1,10 @@
-import { OllamaModelsResponse, ApiError } from "./types";
+import { ModelsResponse, ApiError } from "./types";
 
 /**
  * Fetch models from Ollama API via local proxy
  * Uses Next.js API route to avoid CORS issues
  */
-export async function fetchModels(): Promise<OllamaModelsResponse> {
+export async function fetchModels(): Promise<ModelsResponse> {
   const response = await fetch("/api/models", {
     method: "GET",
     headers: {
@@ -22,7 +22,7 @@ export async function fetchModels(): Promise<OllamaModelsResponse> {
   }
 
   const data = await response.json();
-  return data as OllamaModelsResponse;
+  return data as ModelsResponse;
 }
 
 /**

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { fetchModels, checkApiHealth } from "./api";
-import { OllamaModelsResponse } from "./types";
+import { ModelsResponse } from "./types";
 
 describe("fetchModels", () => {
   beforeEach(() => {
@@ -12,7 +12,7 @@ describe("fetchModels", () => {
   });
 
   it("should fetch models successfully via proxy", async () => {
-    const mockResponse: OllamaModelsResponse = {
+    const mockResponse: ModelsResponse = {
       object: "list",
       data: [
         {
