@@ -1,18 +1,18 @@
 import useSWR from "swr";
-import { fetchModels } from "@/lib/api";
+import { fetchFireworksModels } from "@/lib/api";
 import { ModelsResponse, ApiError } from "@/lib/types";
 
-const MODELS_KEY = "/api/models";
+const FIREWORKS_MODELS_KEY = "/api/fireworks/models";
 
 /**
- * SWR hook for fetching Ollama models
+ * SWR hook for fetching Fireworks models
  * Auto-refreshes every 30 seconds
  */
-export function useModels() {
+export function useFireworksModels() {
   const { data, error, isLoading, mutate } = useSWR<
     ModelsResponse,
     ApiError
-  >(MODELS_KEY, fetchModels, {
+  >(FIREWORKS_MODELS_KEY, fetchFireworksModels, {
     refreshInterval: 30000, // Refresh every 30 seconds
     revalidateOnFocus: true,
     revalidateOnReconnect: true,
