@@ -18,13 +18,14 @@ export interface SizeInfo {
  */
 export function extractSize(modelName: string): number | undefined {
   // Match patterns like "7b", "13b", "70b", "8B" in the model name
-  const match = modelName.match(/:(\d+)(?:\.\d+)?[bB]\b/);
+  // Use (?![a-zA-Z0-9]) instead of \b to treat underscores as separators
+  const match = modelName.match(/:(\d+)(?:\.\d+)?[bB](?![a-zA-Z0-9])/);
   if (match) {
     return parseInt(match[1], 10);
   }
   
   // Also check for patterns like "-7b-" or "_7b_" in the name
-  const altMatch = modelName.match(/[-_](\d+)(?:\.\d+)?[bB]\b/);
+  const altMatch = modelName.match(/[-_](\d+)(?:\.\d+)?[bB](?![a-zA-Z0-9])/);
   if (altMatch) {
     return parseInt(altMatch[1], 10);
   }
