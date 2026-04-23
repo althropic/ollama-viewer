@@ -3,7 +3,7 @@
  * Based on OpenAI-compatible API format
  */
 
-export type Provider = "ollama" | "fireworks";
+export type Provider = "ollama" | "fireworks" | "nvidia";
 
 export interface Model {
   id: string;
