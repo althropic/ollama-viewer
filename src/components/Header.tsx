@@ -2,6 +2,7 @@
 
 import { useModels } from "@/hooks/useModels";
 import { useFireworksModels } from "@/hooks/useFireworksModels";
+import { useNvidiaModels } from "@/hooks/useNvidiaModels";
 import { getSizeInfo } from "@/lib/size";
 import { Provider } from "@/lib/types";
 
@@ -22,12 +23,20 @@ const providerConfig: Record<Provider, { title: string; subtitle: string; gradie
     gradient: "from-orange-500 to-red-600",
     shadow: "shadow-orange-500/20",
   },
+  nvidia: {
+    title: "NVIDIA Dashboard",
+    subtitle: "Manage and visualize your NIM models",
+    gradient: "from-green-500 to-emerald-600",
+    shadow: "shadow-green-500/20",
+  },
 };
 
 export function Header({ provider }: HeaderProps) {
   const ollama = useModels();
   const fireworks = useFireworksModels();
-  const { models, isLoading, error } = provider === "fireworks" ? fireworks : ollama;
+  const nvidia = useNvidiaModels();
+  const providerHook = provider === "fireworks" ? fireworks : provider === "nvidia" ? nvidia : ollama;
+  const { models, isLoading, error } = providerHook;
 
   const config = providerConfig[provider];
 
@@ -60,6 +69,13 @@ export function Header({ provider }: HeaderProps) {
                       strokeLinejoin="round"
                       strokeWidth={2}
                       d="M5 3l14 9-14 9V3z"
+                    />
+                  ) : provider === "nvidia" ? (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"
                     />
                   ) : (
                     <path

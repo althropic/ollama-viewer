@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { useModels } from "@/hooks/useModels";
 import { useFireworksModels } from "@/hooks/useFireworksModels";
+import { useNvidiaModels } from "@/hooks/useNvidiaModels";
 import { getSizeInfo, SizeCategory } from "@/lib/size";
 import { Provider } from "@/lib/types";
 import { ModelCard } from "./ModelCard";
@@ -23,8 +24,10 @@ interface ModelListProps {
 export function ModelList({ provider }: ModelListProps) {
   const ollama = useModels();
   const fireworks = useFireworksModels();
+  const nvidia = useNvidiaModels();
 
-  const { models, isLoading, error, refetch } = provider === "fireworks" ? fireworks : ollama;
+  const providerHook = provider === "fireworks" ? fireworks : provider === "nvidia" ? nvidia : ollama;
+  const { models, isLoading, error, refetch } = providerHook;
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSize, setSelectedSize] = useState<SizeCategory | "all">("all");
 
@@ -80,6 +83,8 @@ export function ModelList({ provider }: ModelListProps) {
         <p className="mt-2 text-sm text-zinc-500">
           {provider === "fireworks"
             ? "Make sure the Fireworks API proxy is running at localhost:5050."
+            : provider === "nvidia"
+            ? "Make sure the NVIDIA API proxy is running at localhost:5050."
             : "Make sure Ollama is running and has models installed."}
         </p>
       </div>

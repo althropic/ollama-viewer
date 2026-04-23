@@ -24,7 +24,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-2 sm:flex-row">
             <p className="text-sm text-zinc-500">
-              {provider === "fireworks" ? "Fireworks" : "Ollama"} Dashboard • Built with Next.js & Tailwind CSS
+              {provider === "fireworks" ? "Fireworks" : provider === "nvidia" ? "NVIDIA" : "Ollama"} Dashboard • Built with Next.js & Tailwind CSS
             </p>
             {provider === "ollama" ? (
               <a
@@ -35,7 +35,7 @@ export default function Home() {
               >
                 Open Ollama Web UI →
               </a>
-            ) : (
+            ) : provider === "fireworks" ? (
               <a
                 href="http://localhost:5050"
                 target="_blank"
@@ -43,6 +43,15 @@ export default function Home() {
                 className="text-sm text-zinc-400 hover:text-white transition-colors"
               >
                 Open Fireworks API →
+              </a>
+            ) : (
+              <a
+                href="http://localhost:5050"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-zinc-400 hover:text-white transition-colors"
+              >
+                Open NVIDIA API →
               </a>
             )}
           </div>
