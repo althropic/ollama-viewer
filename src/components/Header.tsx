@@ -1,10 +1,35 @@
 "use client";
 
 import { useModels } from "@/hooks/useModels";
+import { useFireworksModels } from "@/hooks/useFireworksModels";
 import { getSizeInfo } from "@/lib/size";
+import { Provider } from "@/lib/types";
 
-export function Header() {
-  const { models, isLoading, error } = useModels();
+interface HeaderProps {
+  provider: Provider;
+}
+
+const providerConfig: Record<Provider, { title: string; subtitle: string; gradient: string; shadow: string }> = {
+  ollama: {
+    title: "Ollama Dashboard",
+    subtitle: "Manage and visualize your local AI models",
+    gradient: "from-indigo-500 to-purple-600",
+    shadow: "shadow-indigo-500/20",
+  },
+  fireworks: {
+    title: "Fireworks Dashboard",
+    subtitle: "Manage and visualize your cloud AI models",
+    gradient: "from-orange-500 to-red-600",
+    shadow: "shadow-orange-500/20",
+  },
+};
+
+export function Header({ provider }: HeaderProps) {
+  const ollama = useModels();
+  const fireworks = useFireworksModels();
+  const { models, isLoading, error } = provider === "fireworks" ? fireworks : ollama;
+
+  const config = providerConfig[provider];
 
   const stats = {
     total: models.length,
@@ -22,25 +47,34 @@ export function Header() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20">
+              <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${config.gradient} shadow-lg ${config.shadow}`}>
                 <svg
                   className="h-6 w-6 text-white"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
-                  />
+                  {provider === "fireworks" ? (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 3l14 9-14 9V3z"
+                    />
+                  ) : (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+                    />
+                  )}
                 </svg>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white">Ollama Dashboard</h1>
+                <h1 className="text-2xl font-bold text-white">{config.title}</h1>
                 <p className="text-sm text-zinc-400">
-                  Manage and visualize your local AI models
+                  {config.subtitle}
                 </p>
               </div>
             </div>

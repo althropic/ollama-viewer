@@ -2,7 +2,9 @@
 
 import { useState, useMemo } from "react";
 import { useModels } from "@/hooks/useModels";
+import { useFireworksModels } from "@/hooks/useFireworksModels";
 import { getSizeInfo, SizeCategory } from "@/lib/size";
+import { Provider } from "@/lib/types";
 import { ModelCard } from "./ModelCard";
 import { SearchBar } from "./SearchBar";
 
@@ -14,8 +16,15 @@ const sizeFilters: { category: SizeCategory | "all"; label: string; color: strin
   { category: "heavy", label: "Heavy", color: "bg-red-900/30 text-red-400 border-red-800 hover:bg-red-900/50" },
 ];
 
-export function ModelList() {
-  const { models, isLoading, error, refetch } = useModels();
+interface ModelListProps {
+  provider: Provider;
+}
+
+export function ModelList({ provider }: ModelListProps) {
+  const ollama = useModels();
+  const fireworks = useFireworksModels();
+
+  const { models, isLoading, error, refetch } = provider === "fireworks" ? fireworks : ollama;
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSize, setSelectedSize] = useState<SizeCategory | "all">("all");
 
@@ -69,7 +78,9 @@ export function ModelList() {
       <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-8 text-center">
         <h3 className="text-lg font-medium text-zinc-300">No models found</h3>
         <p className="mt-2 text-sm text-zinc-500">
-          Make sure Ollama is running and has models installed.
+          {provider === "fireworks"
+            ? "Make sure the Fireworks API proxy is running at localhost:5050."
+            : "Make sure Ollama is running and has models installed."}
         </p>
       </div>
     );
@@ -113,7 +124,7 @@ export function ModelList() {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {sortedAndFilteredModels.map((model) => (
-            <ModelCard key={model.id} model={model} />
+            <ModelCard key={model.id} model={model} provider={provider} />
           ))}
         </div>
       )}
