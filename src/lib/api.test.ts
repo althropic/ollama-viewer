@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { fetchModels, checkApiHealth, fetchFireworksModels, checkFireworksApiHealth } from "./api";
+import { fetchModels, checkApiHealth, fetchFireworksModels, checkFireworksApiHealth, fetchNvidiaModels, checkNvidiaApiHealth } from "./api";
 import { ModelsResponse } from "./types";
 
 describe("fetchModels", () => {
@@ -105,6 +105,114 @@ describe("checkApiHealth", () => {
     vi.stubGlobal("fetch", mockFetch);
 
     const result = await checkApiHealth();
+
+    expect(result).toBe(false);
+  });
+});
+
+describe("fetchNvidiaModels", () => {
+  beforeEach(() => {
+    vi.stubGlobal("fetch", vi.fn());
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("should fetch NVIDIA models successfully via proxy", async () => {
+    const mockResponse: ModelsResponse = {
+      object: "list",
+      data: [
+        {
+          id: "nvidia/nemotron-4-340b-instruct",
+          object: "model",
+          created: 1704067200,
+          owned_by: "nvidia",
+        },
+      ],
+    };
+
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockResponse),
+    });
+    vi.stubGlobal("fetch", mockFetch);
+
+    const result = await fetchNvidiaModels();
+
+    expect(result).toEqual(mockResponse);
+    expect(mockFetch).toHaveBeenCalledWith(
+      "/api/nvidia/models",
+      expect.objectContaining({
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      })
+    );
+  });
+
+  it("should throw error on failed NVIDIA response", async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      statusText: "Internal Server Error",
+      json: () => Promise.resolve({ error: "NVIDIA server error" }),
+    });
+    vi.stubGlobal("fetch", mockFetch);
+
+    await expect(fetchNvidiaModels()).rejects.toThrow("NVIDIA server error");
+  });
+
+  it("should throw error on NVIDIA network failure", async () => {
+    const mockFetch = vi.fn().mockRejectedValue(new Error("Network error"));
+    vi.stubGlobal("fetch", mockFetch);
+
+    await expect(fetchNvidiaModels()).rejects.toThrow("Network error");
+  });
+});
+
+describe("checkNvidiaApiHealth", () => {
+  beforeEach(() => {
+    vi.stubGlobal("fetch", vi.fn());
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("should return true when NVIDIA API is healthy", async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+    });
+    vi.stubGlobal("fetch", mockFetch);
+
+    const result = await checkNvidiaApiHealth();
+
+    expect(result).toBe(true);
+    expect(mockFetch).toHaveBeenCalledWith(
+      "/api/nvidia/models",
+      expect.objectContaining({
+        method: "GET",
+        signal: expect.any(AbortSignal),
+      })
+    );
+  });
+
+  it("should return false when NVIDIA API is unhealthy", async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: false,
+    });
+    vi.stubGlobal("fetch", mockFetch);
+
+    const result = await checkNvidiaApiHealth();
+
+    expect(result).toBe(false);
+  });
+
+  it("should return false on NVIDIA network error", async () => {
+    const mockFetch = vi.fn().mockRejectedValue(new Error("Network error"));
+    vi.stubGlobal("fetch", mockFetch);
+
+    const result = await checkNvidiaApiHealth();
 
     expect(result).toBe(false);
   });
