@@ -1,6 +1,6 @@
 import useSWR from "swr";
 import { fetchModels } from "@/lib/api";
-import { OllamaModelsResponse, ApiError } from "@/lib/types";
+import { ModelsResponse, ApiError } from "@/lib/types";
 
 const MODELS_KEY = "/api/models";
 
@@ -10,7 +10,7 @@ const MODELS_KEY = "/api/models";
  */
 export function useModels() {
   const { data, error, isLoading, mutate } = useSWR<
-    OllamaModelsResponse,
+    ModelsResponse,
     ApiError
   >(MODELS_KEY, fetchModels, {
     refreshInterval: 30000, // Refresh every 30 seconds
